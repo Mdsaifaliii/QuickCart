@@ -1,10 +1,13 @@
-import mongoose from "mongoose";
+import { serve } from "inngest/next";
+import {
+  inngest,
+  syncUserCreation,
+  syncUserDeletion,
+  syncUserUpdation,
+} from "@/config/inngest";
 
-const UserSchema = new mongoose.Schema({
-  _id: String, // Clerk user ID
-  name: String,
-  email: String,
-  imageUrl: String,
+// Create an API that serves zero functions
+export const { GET, POST, PUT } = serve({
+  client: inngest,
+  functions: [syncUserCreation, syncUserUpdation, syncUserDeletion],
 });
-
-export default mongoose.models.User || mongoose.model("User", UserSchema);

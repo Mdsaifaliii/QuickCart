@@ -1,9 +1,9 @@
 import { Inngest } from "inngest";
 import connectDB from "./db";
-import User from "@/models/User"; // ✅ FIXED import
+import User from "@/models/User"; 
 import Order from "@/models/Order";
 
-// Create a client to send and receive events
+// client to send and receive events
 export const inngest = new Inngest({ id: "quickcart-next" });
 
 // Inngest function to save user data to a database
@@ -18,10 +18,16 @@ export const syncUserCreation = inngest.createFunction(
       email: email_addresses[0].email_address,
       name: `${first_name} ${last_name}`,
       imageUrl: image_url,
+      cartItems: {},
     };
 
-    await connectDB();
-    await User.create(id,userData);
+    try {
+      await connectDB();
+      await User.create(userData);
+      console.log("User created:", id);
+    } catch (error) {
+      console.error("User creation error:", error);
+    }
   }
 );
 
@@ -33,14 +39,18 @@ export const syncUserUpdation = inngest.createFunction(
     const { id, first_name, last_name, email_addresses, image_url } = event.data;
 
     const userData = {
-      _id: id,
       email: email_addresses[0].email_address,
       name: `${first_name} ${last_name}`,
       imageUrl: image_url,
     };
 
-    await connectDB();
-    await User.findByIdAndUpdate(id, userData);
+    try {
+      await connectDB();
+      await User.findByIdAndUpdate(id, userData);
+      console.log("User updated:", id);
+    } catch (error) {
+      console.error("User update error:", error);
+    }
   }
 );
 
@@ -65,10 +75,10 @@ export const createUserOrder = inngest.createFunction(
       timeout: '5s'
     }
   },
-  {event: 'order/created'},
-  async ({events}) => {
+  { event: 'order/created' },
+  async ({ events }) => {
 
-    const orders = events.map((event)=> {
+    const orders = events.map((event) => {
       return {
         userId: event.data.userId,
         items: event.data.items,

@@ -3,10 +3,10 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import Product from "@/models/Product"; 
-import authSeller from "@/lib/authSeller"; // make sure this file exists & exports default
+import authSeller from "@/lib/authSeller"; 
 
 
-// ✅ Configure Cloudinary
+// Configure Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -16,7 +16,6 @@ cloudinary.config({
 
 export async function POST(request) {
     try {
-        // ✅ Fix: pass `request` to getAuth()
         const { userId } = getAuth(request);
 
         const isSeller = await authSeller(userId);
@@ -38,7 +37,7 @@ export async function POST(request) {
             return NextResponse.json({ success: false, message: "No files uploaded" });
         }
 
-        // ✅ Upload to Cloudinary
+        // Upload to Cloudinary
         const result = await Promise.all(
             files.map(async (file) => {
                 const arrayBuffer = await file.arrayBuffer();
@@ -59,7 +58,7 @@ export async function POST(request) {
 
         const image = result.map((r) => r.secure_url);
 
-        // ✅ Save product
+        // Save product
         await connectDB();
         const newProduct = await Product.create({
             userId,

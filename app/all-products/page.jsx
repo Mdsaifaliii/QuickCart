@@ -3,12 +3,22 @@ import ProductCard from "@/components/ProductCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAppContext } from "@/context/AppContext";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const AllProducts = () => {
   const { products } = useAppContext();
-  const searchParams = useSearchParams();
-  const search = searchParams?.get("search")?.toLowerCase() || "";
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const read = () => {
+      const params = new URLSearchParams(window.location.search);
+      setSearch((params.get("search") || "").toLowerCase());
+    };
+    read();
+    window.addEventListener("popstate", read);
+    return () => window.removeEventListener("popstate", read);
+  }, []);
+
   const filteredProducts = search
     ? products.filter(
         (product) =>
